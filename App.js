@@ -78,9 +78,14 @@ class Mainlist extends Component{
   render(){
     return(
       <div className="contentbox">      
+        <div className="side-menu">
+          <a>Menu1</a>
+          <a>Menu2</a>
+          <a>Edit</a>
+          <a onClick={ this.handleDel }>Delete</a>
+        </div>
         <h6>{this.props.ikey} {this.props.name}</h6>
         <h6>{this.props.content}</h6>
-        <button onClick={ this.handleDel }>DEL</button>
         <button>EDIT</button>
       </div>
     )
