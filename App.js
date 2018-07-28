@@ -1,125 +1,63 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './css/app.css';
+import ReactDOM from 'react-dom';
+
+import './App.css';
+import Userinfo from './Userinfo';
 
 class App extends Component {
-  constructor(props){
-      super(props);
-      this.state = {
-       // selectedKey:-1,
-        info:[
-        { name: "Yohan", content:"Mauris eget lacus fringilla, congue justo eu, suscipit ligula." },
-        { name: "Hanna", content:"Vestibulum vestibulum nisi non mauris malesuada" },
-        { name: "Stephanie", content:"Aliquam at tincidunt dui. Suspendisse dapibus euismod sem" },
-        { name: "Eugene", content:"Sed vehicula sed metus maximus semper." },
-        { name: "Carmen", content:"Fusce maximus porta ipsum ut facilisis" },                               
-        { name: "Sophia", content:"In non lorem sed arcu elementum scelerisque vel a odio" },
-        { name: "Carmen", content:"Fusce maximus porta ipsum ut facilisis" }
-        ]
-      };    
-
-      this.handlePost = this.handlePost.bind(this);
-      this.handleDelete = this.handleDelete.bind(this);
-      this.handleEdit = this.handleEdit.bind(this);
+  state = {
+    userinfo:[],
+    per: 8,
+    page:1,
+    totalPages: null,
+    hasMore: null
   }
 
-  handlePost(newContent){
-      this.setState({
-          info: [...this.state.info, newContent]
-      });
-  }
-
-  handleEdit(index){
-    //
-  }
-  handleDelete(index){
-    var array = [...this.state.info]; // make a separate copy of the array
-    array.splice(index, 1);
-    this.setState({info: array});
+  componentWillMount(){
+    this.loadContacts()
   }
 
 
+  loadContacts = () =>{
+    const { per, page, userinfo } = this.state;
+    const url = "/users/haha?per="+per+"&page="+page
+    console.log(url);
+    fetch(url)
+      .then(res => res.json())
+      .then(json => this.setState({
+        userinfo: [...userinfo, ...json.userinfo],
+        hasMore: json.hasMore
+      }));    
+  }
+
+  loadMore = () => {
+    this.setState(prevState => ({
+      page: prevState.page + 1,
+    }), this.loadContacts)
+  }
 
   render() {
+    let button;
+    if(this.state.hasMore){
+      button = <a onClick={this.loadMore}>Load More</a>;
+    }else{
+      button="";
+    }
+
     return (
       <div className="App">
-        <h4>Gentle-Book</h4>
-        <div className="user-input">
-          <Create_content handlePost={this.handlePost} />
-        </div>
-        <div className="main-list">
-          { this.state.info.reverse().map((contents, index) => {
-              return <Mainlist 
-                name={contents.name} content = {contents.content}
-                key={index} ikey={index}
-                handleDelete={ this.handleDelete }
-              />
-            })
-          }
-
-        </div>
+        <h1>Users</h1>
+        <ul>
+          {this.state.userinfo.map(user =>
+            <div className="user-list" key={user.id}>
+              <Userinfo {...user}></Userinfo>
+            </div>
+          )}
+        </ul>
+        {button}
       </div>
     );
   }
-} // App Compoent Close
-
-
-class Mainlist extends Component{
-  constructor(props){
-    super(props);
-
-    this.handleDel = this.handleDel.bind(this);
-  }
-
-  handleDel(){
-    this.props.handleDelete(this.props.ikey);
-  }
-
-  render(){
-    return(
-      <div className="contentbox">      
-        <div className="side-menu">
-          <a>Menu1</a>
-          <a>Menu2</a>
-          <a>Edit</a>
-          <a onClick={ this.handleDel }>Delete</a>
-        </div>
-        <h6>{this.props.ikey} {this.props.name}</h6>
-        <h6>{this.props.content}</h6>
-        <button>EDIT</button>
-      </div>
-    )
-  }
-} // Mainlist Component close
-
-
-class Create_content extends Component{
-  constructor(props){
-    super(props);
-
-    this.handlePostD = this.handlePostD.bind(this);
-  }
-
-  handlePostD(){
-      var newContent = document.getElementById('write-content').value;
-      const contentData = {
-        name: 'Yohan',
-        content: newContent
-      }
-      this.props.handlePost(contentData);
-      document.getElementById('write-content').value = "";
-
-  }
-
-  render(){
-    return(
-      <div>
-        <textarea id="write-content" placeholder="What happened today?"></textarea>
-        <button onClick={this.handlePostD}>POST</button>      
-      </div>
-    )
-  }  
 }
-
 
 export default App;
